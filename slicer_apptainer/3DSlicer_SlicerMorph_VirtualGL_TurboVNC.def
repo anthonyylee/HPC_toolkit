@@ -4,7 +4,7 @@ From: ubuntu:22.04
 %labels
 # Used to add metadata to the file `/.singularity.d/labels.json` within the container in name-value pairs.
 Author Anthony Lee
-Version v1.1
+Version v1.2
 Source "https://github.com/anthonyylee/HPC_Toolkit/blob/main/slicer_apptainer/3DSlicer_SlicerMorph_VirtualGL_TurboVNC.def"
 
 %help
@@ -67,16 +67,25 @@ rm -rf Slicer-* Slicer-5.10.0.tar.gz
 chmod +x ${SLICER_HOME}/Slicer
 
 # Install SlicerMorph extension in headless mode (Source: https://discourse.slicer.org/t/running-slicer-on-headless-server-installing-extensions-and-more/11689/4)
-cat <<-'EOF' > slicer_install_slicermorph_extension.py
+cat <<-'EOF' > slicer_install_extensions.py
 	# https://slicer.readthedocs.io/en/latest/developer_guide/script_repository.html#download-and-install-extension
-	extensionName = 'SlicerMorph'
-	em = slicer.app.extensionsManagerModel()
-	em.interactive = False  # prevent display of popups
-	restart = True
-	if not em.installExtensionFromServer(extensionName, restart):
-	  raise ValueError(f"Failed to install {extensionName} extension")
+
+	extension_names = ["SlicerMorph", "Sandbox", "NvidiaAIAssistedAnnotation"]
+
+	for ext_idx, extension_name in enumerate(extension_names):
+	    em = slicer.app.extensionsManagerModel()
+	    em.interactive = False  # prevent display of popups
+
+	    # Only restart after installing the last extension
+	    if (ext_idx == len(extension_names)-1):
+	        restart = True
+	    else:
+	        restart = False
+
+	    if not em.installExtensionFromServer(extension_name, restart):
+	        raise ValueError(f"Failed to install {extension_name} extension")
 EOF
-xvfb-run -a $SLICER_HOME/Slicer --no-splash --no-main-window --python-script "./slicer_install_slicermorph_extension.py"
+xvfb-run -a $SLICER_HOME/Slicer --no-splash --no-main-window --python-script "./slicer_install_extensions.py"
 
 # Set variables 
 echo "export PATH=$SLICER_HOME:\$PATH" >> $APPTAINER_ENVIRONMENT
