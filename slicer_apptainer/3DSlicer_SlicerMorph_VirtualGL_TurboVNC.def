@@ -191,7 +191,6 @@ apt update && apt install -y \
   kmod \
   inxi \
   lshw \
-  firefox \
 
 %test
 # Runs at the very end of the build process to be used to validate the container.
