@@ -4,7 +4,7 @@ From: ubuntu:22.04
 %labels
 # Used to add metadata to the file `/.singularity.d/labels.json` within the container in name-value pairs.
 Author Anthony Lee
-Version v1.3
+Version v1.4
 Source "https://github.com/anthonyylee/HPC_Toolkit/blob/main/slicer_apptainer/3DSlicer_SlicerMorph_VirtualGL_TurboVNC.def"
 
 %help
@@ -70,7 +70,7 @@ chmod +x ${SLICER_HOME}/Slicer
 cat <<-'EOF' > slicer_install_extensions.py
 	# https://slicer.readthedocs.io/en/latest/developer_guide/script_repository.html#download-and-install-extension
 
-	extension_names = ["SlicerMorph", "Sandbox", "NvidiaAIAssistedAnnotation"]
+	extension_names = ["SlicerMorph", "Sandbox", "NvidiaAIAssistedAnnotation", "SlicerIGT"]
 
 	for ext_idx, extension_name in enumerate(extension_names):
 	    em = slicer.app.extensionsManagerModel()
