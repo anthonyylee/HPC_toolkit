@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: ubuntu:22.04
+From: ubuntu:24.04
 
 %labels
 # Used to add metadata to the file `/.singularity.d/labels.json` within the container in name-value pairs.
