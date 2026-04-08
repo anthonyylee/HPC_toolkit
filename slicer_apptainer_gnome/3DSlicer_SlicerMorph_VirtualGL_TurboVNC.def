@@ -1,0 +1,232 @@
+Bootstrap: docker
+From: ubuntu:24.04
+
+%labels
+# Used to add metadata to the file `/.singularity.d/labels.json` within the container in name-value pairs.
+Author Anthony Lee
+Version v1.5
+Source "https://github.com/anthonyylee/HPC_Toolkit/blob/main/slicer_apptainer/3DSlicer_SlicerMorph_VirtualGL_TurboVNC.def"
+
+%help
+# Any text in this section will be transcribed into a dedicated metadata file in the container during the build process.
+Container with 3D Slicer, TurboVNC, and VirtualGL.
+Each are installed as an SCIF app and can be launched independently. However, it is recommended to launch the TurboVNC
+VNC server with VirtualGL for hardware accelerated rendering. Use the following command to launch the vncserver with 
+VirtualGL for hardware accelerated VNC session.
+
+`apptainer run --app turbovnc --nv --bind /run,/gpfs <container_name.sif>`
+
+`apptainer shell --nv --bimd /run,/gpfs <container_name.sif>` then run `vglrun -d egl vncserver -fg` (the `-fg` flag is optional.)
+
+`apptainer exec --nv <container_name.sif> vlgrun -d egl vncserver -fg`  # `-fg` flag required, else will receive a timeout error
+
+Detailed notes: 
+- Usually Tillicum automatically bind /gpfs, but it is helpful to be explicit.
+- `--nv` flag is important for VirtualGL to work. Without the Nvidia drivers, VirtualGL will use LLVM Pipe software
+  acceleration instead of hardware acceleration.
+
+%arguments
+# Variables for during the build process. Subjected to being overwritten by
+# `-build-arg` or `-build-arg-file`
+MY_VNC_PASSWORD=12341234
+
+%setup
+# BEWARE!!! Executed on the host system OUTSIDE of the container thus could damage the host.
+
+%files
+# Allows for copying files into the container with greater safety than the `%setup` section.
+
+%apphelp slicer
+There are two methods to run the 3D Slicer application:
+
+  (1) Using Open On Demand (OOD) remote destkop
+    Access a remote desktop via OOD, open a terminal, and launch `apptainer run --app slicer --nv --bind /run,/gpfs <container_name.sif>`.
+    The flag to bind `/run` allows for runtime files to be saved. However, this will not be hardware accelerated (see the second method).
+
+  (2) Launching the TurboVNC server, port-forward from local client, and access with TurboVNC
+    In a Slurm job or Slurm allocated (e.g., `salloc`) environment, run `apptainer run --app turbovnc --nv --bind /run,/gpfs <container_name.sif>`.
+    Port-forward from local client to the compute node using `ssh -L $[5900+N]:localhost:$[5900+N] <username>@<running_node_hostname>` 
+    (e.g., `ssh -L 5901:localhost:5901 antlee@g001.hyak.local`), then access the desktop using TurboVNC client.
+
+%apprun slicer
+exec /opt/slicer/Slicer "${@}"
+
+%appinstall slicer
+# xvfb for headless extension installation
+apt install -y xvfb
+
+# Install slicer
+SLICER_HOME="/opt/slicer"
+LD_LIBRARY_PATH="/lib"
+mkdir -p $SLICER_HOME
+cd $SLICER_HOME
+wget -O Slicer-5.10.0.tar.gz "https://download.slicer.org/bitstream/6911b598ac7b1c95e7934427"
+tar -zxvf Slicer-5.10.0.tar.gz
+mv Slicer-*/* .
+rm -rf Slicer-* Slicer-5.10.0.tar.gz
+chmod +x ${SLICER_HOME}/Slicer
+
+# Install SlicerMorph extension in headless mode (Source: https://discourse.slicer.org/t/running-slicer-on-headless-server-installing-extensions-and-more/11689/4)
+cat <<-'EOF' > slicer_install_extensions.py
+	# https://slicer.readthedocs.io/en/latest/developer_guide/script_repository.html#download-and-install-extension
+
+	extension_names = ["SlicerMorph", "Sandbox", "NvidiaAIAssistedAnnotation", "SlicerIGT"]
+
+	for ext_idx, extension_name in enumerate(extension_names):
+	    em = slicer.app.extensionsManagerModel()
+	    em.interactive = False  # prevent display of popups
+
+	    # Only restart after installing the last extension
+	    if (ext_idx == len(extension_names)-1):
+	        restart = True
+	    else:
+	        restart = False
+
+	    if not em.installExtensionFromServer(extension_name, restart):
+	        raise ValueError(f"Failed to install {extension_name} extension")
+EOF
+xvfb-run -a $SLICER_HOME/Slicer --no-splash --no-main-window --python-script "./slicer_install_extensions.py"
+
+# Set variables 
+echo "export PATH=$SLICER_HOME:\$PATH" >> $APPTAINER_ENVIRONMENT
+echo "export PATH=$LD_LIBRARY_PATH:\$PATH" >> $APPTAINER_ENVIRONMENT
+
+%apphelp turbovnc
+Run the TurboVNC server. Start the server with `apptainer run --app turbovnc --nv <container_name.sif>`.
+
+The VNC server is ran in the foreground else the contianer will terminate. Thus, when running this app, the process will
+be held by the server and terminating the process will result in the server being terminated.
+`--nv` flag is required for VirtualGL to utilize hardware acceleration.
+
+%apprun turbovnc
+# Set VNC password
+# Source: https://askubuntu.com/questions/328240/assign-vnc-password-using-script
+rm -drf $HOME/.vnc
+mkdir $HOME/.vnc
+echo {{MY_VNC_PASSWORD}} | /opt/TurboVNC/bin/vncpasswd -f > $HOME/.vnc/passwd
+chmod 0600 $HOME/.vnc/passwd
+cat <<-'EOF'
+
+	####################	
+	VNC password is {{MY_VNC_PASSWORD}}
+	####################	
+  
+EOF
+
+# Disable screensaver
+# Note - Does not work, uanble to open display error. Probably because the display variable is not set yet.
+# xset s off TODO: 2026-01-30 AL - Figure how to get this to work
+
+# Have to run in foreground else the container will terminate and give a squashfuse_ll terminted after timeout error.
+# Using `vglrun -d egl` to force using EGL
+# `-fg` flag makes it run in the foreground preventing it from being killed when the initiating SSH session ends.
+exec vglrun -d egl /opt/TurboVNC/bin/vncserver -fg "${@}"
+
+%appinstall turbovnc
+# Source: https://turbovnc.org/Downloads/YUM
+apt install -y gnupg wget
+wget -q -O- https://packagecloud.io/dcommander/turbovnc/gpgkey | \
+  gpg --dearmor >/etc/apt/trusted.gpg.d/TurboVNC.gpg
+wget -P /etc/apt/sources.list.d https://raw.githubusercontent.com/TurboVNC/repo/main/TurboVNC.list
+apt update && apt install -y turbovnc
+
+# Set variables 
+echo "export PATH=/opt/TurboVNC/bin:\$PATH" >> $APPTAINER_ENVIRONMENT
+
+%apphelp virtualgl
+Use `vglrun -d egl glxspheres64` to use hardware acceleration. `vglrun -d $DISPLAY glxspheres64` does not work.
+
+VirtualGL to allow for hardware acceleration when using with TurboVNC server and client.
+
+%apprun virtualgl
+exec /opt/VirtualGL/bin/vglrun -d egl "${@}"
+
+%appinstall virtualgl
+# Source: https://virtualgl.org/Downloads/YUM
+apt install -y gnupg wget
+wget -q -O- https://packagecloud.io/dcommander/virtualgl/gpgkey | \
+gpg --dearmor >/etc/apt/trusted.gpg.d/VirtualGL.gpg
+wget -P /etc/apt/sources.list.d https://raw.githubusercontent.com/VirtualGL/repo/main/VirtualGL.list
+apt update && apt install -y virtualgl
+
+# Set variables 
+echo "export PATH=/opt/VirtualGL/bin:\$PATH" >> $APPTAINER_ENVIRONMENT
+
+%post
+# Runs in a clean environment. The env variables from the host are not passed into the build.
+
+# Tip to prevent getting stuck by interactive inputs - https://github.com/docker/build-push-action/issues/504#issuecomment-981524839
+export DEBIAN_FRONTEND=noninteractive
+
+apt update && apt install -y \
+  vim \
+  man-db \
+  #xfce4 \
+  ubuntu-desktop \
+  wget ca-certificates unzip \
+  libglu1-mesa libpulse-mainloop-glib0 libnss3 \
+  libasound2 libsm6 libice6 qt5dxcb-plugin\
+  libx11-6 libx11-xcb1 libxcb1 libxcb-icccm4 \
+  libxkbcommon0 libxkbcommon-x11-0 \
+  libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
+  libxcb-shape0 libxcb-sync1 libxcb-xfixes0 libxcb-xinerama0 \
+  libxt6 libxrender1 libxext6 libxcomposite1 libxdamage1 \
+  libxrandr2 libxkbfile1 libfreetype6 libfontconfig1 \
+  libgl1-mesa-glx libgl1-mesa-dri mesa-utils \
+
+
+# https://gitlab.com/nvidia/container-images/opengl/blob/ubuntu20.04/glvnd/devel/Dockerfile
+#apt update && apt install -y --no-install-recommends \
+#  pkg-config \
+#  libglvnd-dev libglvnd-dev:i386 \
+#  libgl1-mesa-dev libgl1-mesa-dev:i386 \
+#  libegl1-mesa-dev libegl1-mesa-dev:i386 \
+#  libgles2-mesa-dev libgles2-mesa-dev:i386 && \
+#rm -rf /var/lib/apt/lists/*
+
+
+# Some optional stuff
+# - xfce4-goodies because they are goodies
+# - pciutils because I need lspci
+# - kmod so I can use lsmod
+#apt update && apt install -y \
+#  xfce4-goodies \
+#  pciutils \
+#  kmod \
+#  inxi \
+#  lshw \
+
+%test
+# Runs at the very end of the build process to be used to validate the container.
+
+%environment
+# Define environ variables that will be set at runtime.
+
+%startscript
+# Similar to `%runscript` section. The contents are written to a dedicated file within the container at build time.
+
+%runscript
+# Contents are written to a dedicated file within the container at build time.
+
+# NOTES - Ways to run the SCIF app from runscript
+# Source: https://apptainer.org/docs/user/1.3/environment_and_metadata.html#environment-from-the-apptainer-runtime
+# exec apptainer run --app turbovnc "$APPTAINER_CONTAINER" "${@}"
+
+cat <<-'EOF'
+
+
+	VNC password is {{MY_VNC_PASSWORD}}
+
+	Run 
+	  `apptainer run --app turbovnc --nv --bind /run,/gpfs <container_name.sif>`
+	OR
+	  `apptainer exec --nv <container_name.sif> vlgrun -d egl vncserver -fg` (`-fg` flag required)
+	OR
+	  `apptainer shell --nv --bind /run,/gpfs <container_name.sif>`
+	  and then launch TurboVNC server with `vglrun -d egl vncserver` or
+	  `vglrun -d egl vncserver -fg` (`-fg` flag optional)  to run the server in the foreground.
+
+
+EOF
+  
+
