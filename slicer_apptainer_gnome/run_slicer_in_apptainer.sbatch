@@ -11,4 +11,4 @@ apptainer run \
   --app turbovnc \
   --nv \
   --bind /run,/gpfs \
-  /gpfs/projects/gavia/apptainer_containers/3DSlicer_SlicerMorph_VirtualGL_TurboVNC.sif
+  ./3DSlicer_SlicerMorph_VirtualGL_TurboVNC.sif

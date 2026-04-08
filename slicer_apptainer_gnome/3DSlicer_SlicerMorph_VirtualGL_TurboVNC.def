@@ -161,18 +161,19 @@ export DEBIAN_FRONTEND=noninteractive
 apt update && apt install -y \
   vim \
   man-db \
-  #xfce4 \
   ubuntu-desktop \
   wget ca-certificates unzip \
   libglu1-mesa libpulse-mainloop-glib0 libnss3 \
-  libasound2 libsm6 libice6 qt5dxcb-plugin\
+  libasound2t64 libsm6 libice6 qt5dxcb-plugin\
   libx11-6 libx11-xcb1 libxcb1 libxcb-icccm4 \
   libxkbcommon0 libxkbcommon-x11-0 \
   libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
   libxcb-shape0 libxcb-sync1 libxcb-xfixes0 libxcb-xinerama0 \
-  libxt6 libxrender1 libxext6 libxcomposite1 libxdamage1 \
+  libxt6t64 libxrender1 libxext6 libxcomposite1 libxdamage1 \
   libxrandr2 libxkbfile1 libfreetype6 libfontconfig1 \
-  libgl1-mesa-glx libgl1-mesa-dri mesa-utils \
+  # libgl1-mesa-glx 
+  # libgl1-mesa-dri
+  # mesa-utils
 
 
 # https://gitlab.com/nvidia/container-images/opengl/blob/ubuntu20.04/glvnd/devel/Dockerfile
