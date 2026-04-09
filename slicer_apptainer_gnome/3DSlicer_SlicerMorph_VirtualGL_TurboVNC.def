@@ -113,10 +113,6 @@ cat <<-'EOF'
   
 EOF
 
-# Disable screensaver
-# Note - Does not work, uanble to open display error. Probably because the display variable is not set yet.
-# xset s off TODO: 2026-01-30 AL - Figure how to get this to work
-
 # Have to run in foreground else the container will terminate and give a squashfuse_ll terminted after timeout error.
 # Using `vglrun -d egl` to force using EGL
 # `-fg` flag makes it run in the foreground preventing it from being killed when the initiating SSH session ends.
@@ -170,8 +166,8 @@ apt update && apt install -y \
   libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
   libxcb-shape0 libxcb-sync1 libxcb-xfixes0 libxcb-xinerama0 \
   libxt6t64 libxrender1 libxext6 libxcomposite1 libxdamage1 \
-  libxrandr2 libxkbfile1 libfreetype6 libfontconfig1 \
-  # libgl1-mesa-glx 
+  libxrandr2 libxkbfile1 libfreetype6 libfontconfig1
+  # libgl1-mesa-glx
   # libgl1-mesa-dri
   # mesa-utils
 
@@ -185,8 +181,7 @@ apt update && apt install -y \
 #  libgles2-mesa-dev libgles2-mesa-dev:i386 && \
 #rm -rf /var/lib/apt/lists/*
 
-
-# Some optional stuff
+# Some optional stuff that does not come standard with XFCE4444
 # - xfce4-goodies because they are goodies
 # - pciutils because I need lspci
 # - kmod so I can use lsmod
@@ -229,5 +224,3 @@ cat <<-'EOF'
 
 
 EOF
-  
-
