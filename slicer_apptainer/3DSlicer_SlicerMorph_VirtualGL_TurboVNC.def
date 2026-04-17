@@ -4,7 +4,7 @@ From: ubuntu:24.04
 %labels
 # Used to add metadata to the file `/.singularity.d/labels.json` within the container in name-value pairs.
 Author Anthony Lee
-Version v1.5
+Version v1.6
 Source "https://github.com/anthonyylee/HPC_Toolkit/blob/main/slicer_apptainer/3DSlicer_SlicerMorph_VirtualGL_TurboVNC.def"
 
 %help
@@ -54,6 +54,10 @@ exec /opt/slicer/Slicer "${@}"
 %appinstall slicer
 # xvfb for headless extension installation
 apt install -y xvfb
+
+# Install Slicer dependencies
+# https://slicer.readthedocs.io/en/latest/user_guide/getting_started.html#ubuntu-24-04-noble-numbat
+sudo apt install -y libglu1-mesa libpulse-mainloop-glib0 libnss3 libasound2t64 qt5dxcb-plugin
 
 # Install slicer
 SLICER_HOME="/opt/slicer"
