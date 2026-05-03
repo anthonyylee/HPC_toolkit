@@ -57,7 +57,8 @@ apt install -y xvfb
 
 # Install Slicer dependencies
 # https://slicer.readthedocs.io/en/latest/user_guide/getting_started.html#ubuntu-24-04-noble-numbat
-sudo apt install -y libglu1-mesa libpulse-mainloop-glib0 libnss3 libasound2t64 qt5dxcb-plugin
+#sudo apt install -y libglu1-mesa libpulse-mainloop-glib0 libnss3 libasound2t64 qt5dxcb-plugin
+sudo apt-get install -y libglu1-mesa libpulse-mainloop-glib0 libnss3 libasound2t64 qt5dxcb-plugin
 
 # Install slicer
 SLICER_HOME="/opt/slicer"
@@ -168,14 +169,14 @@ apt update && apt install -y \
   xfce4 \
   wget ca-certificates unzip \
   libglu1-mesa libpulse-mainloop-glib0 libnss3 \
-  libasound2 libsm6 libice6 qt5dxcb-plugin\
+  libsm6 libice6 qt5dxcb-plugin\
   libx11-6 libx11-xcb1 libxcb1 libxcb-icccm4 \
   libxkbcommon0 libxkbcommon-x11-0 \
   libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
   libxcb-shape0 libxcb-sync1 libxcb-xfixes0 libxcb-xinerama0 \
   libxt6 libxrender1 libxext6 libxcomposite1 libxdamage1 \
   libxrandr2 libxkbfile1 libfreetype6 libfontconfig1 \
-  libgl1-mesa-glx libgl1-mesa-dri mesa-utils \
+  libgl1-mesa-dri mesa-utils \
 
 
 # https://gitlab.com/nvidia/container-images/opengl/blob/ubuntu20.04/glvnd/devel/Dockerfile
