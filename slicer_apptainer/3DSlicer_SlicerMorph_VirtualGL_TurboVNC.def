@@ -4,7 +4,7 @@ From: ubuntu:24.04
 %labels
 # Used to add metadata to the file `/.singularity.d/labels.json` within the container in name-value pairs.
 Author Anthony Lee
-Version v1.6
+Version v1.7
 Source "https://github.com/anthonyylee/HPC_Toolkit/blob/main/slicer_apptainer/3DSlicer_SlicerMorph_VirtualGL_TurboVNC.def"
 
 %help
@@ -106,6 +106,7 @@ be held by the server and terminating the process will result in the server bein
 %apprun turbovnc
 # Set VNC password
 # Source: https://askubuntu.com/questions/328240/assign-vnc-password-using-script
+pulseaudio --start  # Fix `[Qt] PulseAudioService: pa_context_connect() failed` in 3D Slicer
 rm -drf $HOME/.vnc
 mkdir $HOME/.vnc
 echo {{MY_VNC_PASSWORD}} | /opt/TurboVNC/bin/vncpasswd -f > $HOME/.vnc/passwd
