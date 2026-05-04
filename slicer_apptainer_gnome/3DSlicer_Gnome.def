@@ -3,9 +3,8 @@ From: ubuntu:24.04
 
 %labels
 # Used to add metadata to the file `/.singularity.d/labels.json` within the container in name-value pairs.
-Author Anthony Lee
-Version v1.5
-Source "https://github.com/anthonyylee/HPC_Toolkit/blob/main/slicer_apptainer/3DSlicer_SlicerMorph_VirtualGL_TurboVNC.def"
+Author Anthony Y. Lee
+Version v0.0.1
 
 %help
 # Any text in this section will be transcribed into a dedicated metadata file in the container during the build process.
@@ -52,8 +51,22 @@ There are two methods to run the 3D Slicer application:
 exec /opt/slicer/Slicer "${@}"
 
 %appinstall slicer
+export DEBIAN_FRONTEND=noninteractive
+apt update
+
 # xvfb for headless extension installation
-apt install -y xvfb
+apt install -y \
+  xvfb \
+
+# Install Slicer dependencies
+# https://slicer.readthedocs.io/en/latest/user_guide/getting_started.html#ubuntu-24-04-noble-numbat
+#sudo apt install -y libglu1-mesa libpulse-mainloop-glib0 libnss3 libasound2t64 qt5dxcb-plugin
+apt-get install -y \
+  libglu1-mesa \
+  libpulse-mainloop-glib0 \
+  libnss3 \
+  libasound2t64 \
+  qt5dxcb-plugin \
 
 # Install slicer
 SLICER_HOME="/opt/slicer"
@@ -91,6 +104,8 @@ xvfb-run -a $SLICER_HOME/Slicer --no-splash --no-main-window --python-script "./
 echo "export PATH=$SLICER_HOME:\$PATH" >> $APPTAINER_ENVIRONMENT
 echo "export PATH=$LD_LIBRARY_PATH:\$PATH" >> $APPTAINER_ENVIRONMENT
 
+apt clean
+
 %apphelp turbovnc
 Run the TurboVNC server. Start the server with `apptainer run --app turbovnc --nv <container_name.sif>`.
 
@@ -113,14 +128,24 @@ cat <<-'EOF'
   
 EOF
 
+# Disable screensaver
+# Note - Does not work, uanble to open display error. Probably because the display variable is not set yet.
+# xset s off TODO: 2026-01-30 AL - Figure how to get this to work
+
 # Have to run in foreground else the container will terminate and give a squashfuse_ll terminted after timeout error.
 # Using `vglrun -d egl` to force using EGL
 # `-fg` flag makes it run in the foreground preventing it from being killed when the initiating SSH session ends.
 exec vglrun -d egl /opt/TurboVNC/bin/vncserver -fg "${@}"
 
 %appinstall turbovnc
+
+export DEBIAN_FRONTEND=noninteractive
+apt update
+apt install -y \
+  gnupg \
+  wget \
+
 # Source: https://turbovnc.org/Downloads/YUM
-apt install -y gnupg wget
 wget -q -O- https://packagecloud.io/dcommander/turbovnc/gpgkey | \
   gpg --dearmor >/etc/apt/trusted.gpg.d/TurboVNC.gpg
 wget -P /etc/apt/sources.list.d https://raw.githubusercontent.com/TurboVNC/repo/main/TurboVNC.list
@@ -128,6 +153,8 @@ apt update && apt install -y turbovnc
 
 # Set variables 
 echo "export PATH=/opt/TurboVNC/bin:\$PATH" >> $APPTAINER_ENVIRONMENT
+
+apt clean
 
 %apphelp virtualgl
 Use `vglrun -d egl glxspheres64` to use hardware acceleration. `vglrun -d $DISPLAY glxspheres64` does not work.
@@ -138,8 +165,13 @@ VirtualGL to allow for hardware acceleration when using with TurboVNC server and
 exec /opt/VirtualGL/bin/vglrun -d egl "${@}"
 
 %appinstall virtualgl
+export DEBIAN_FRONTEND=noninteractive
+apt update
+apt install -y \
+  gnupg \
+  wget \
+
 # Source: https://virtualgl.org/Downloads/YUM
-apt install -y gnupg wget
 wget -q -O- https://packagecloud.io/dcommander/virtualgl/gpgkey | \
 gpg --dearmor >/etc/apt/trusted.gpg.d/VirtualGL.gpg
 wget -P /etc/apt/sources.list.d https://raw.githubusercontent.com/VirtualGL/repo/main/VirtualGL.list
@@ -148,28 +180,61 @@ apt update && apt install -y virtualgl
 # Set variables 
 echo "export PATH=/opt/VirtualGL/bin:\$PATH" >> $APPTAINER_ENVIRONMENT
 
+apt clean
+
 %post
 # Runs in a clean environment. The env variables from the host are not passed into the build.
 
 # Tip to prevent getting stuck by interactive inputs - https://github.com/docker/build-push-action/issues/504#issuecomment-981524839
 export DEBIAN_FRONTEND=noninteractive
 
-apt update && apt install -y \
-  vim \
-  man-db \
+apt update 
+
+# Install desktop environmtn
+apt install -y \
   ubuntu-desktop \
-  wget ca-certificates unzip \
-  libglu1-mesa libpulse-mainloop-glib0 libnss3 \
-  libasound2t64 libsm6 libice6 qt5dxcb-plugin\
-  libx11-6 libx11-xcb1 libxcb1 libxcb-icccm4 \
-  libxkbcommon0 libxkbcommon-x11-0 \
-  libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
-  libxcb-shape0 libxcb-sync1 libxcb-xfixes0 libxcb-xinerama0 \
-  libxt6t64 libxrender1 libxext6 libxcomposite1 libxdamage1 \
-  libxrandr2 libxkbfile1 libfreetype6 libfontconfig1
-  # libgl1-mesa-glx
-  # libgl1-mesa-dri
-  # mesa-utils
+
+# Install some utilities
+apt install -y \
+  vim \
+  main-db \
+  wget \
+  ca-certifiates \
+  unzip \
+
+# Do I really need to install these or would they just come with ubuntu-desktop?
+apt update && apt install -y \
+  libfontconfig1 \
+  libfreetype6 \
+  libgl1-mesa-dri \
+  libglu1-mesa \
+  libice6 \
+  libnss3 \
+  libpulse-mainloop-glib0 \
+  libsm6 \
+  libx11-6 \
+  libx11-xcb1 \
+  libxcb-icccm4 \
+  libxcb-image0 \
+  libxcb-keysyms1 \
+  libxcb-randr0 \
+  libxcb-render-util0 \
+  libxcb-shape0 \
+  libxcb-sync1 \
+  libxcb-xfixes0 \
+  libxcb-xinerama0 \
+  libxcb1 \
+  libxcomposite1 \
+  libxdamage1 \
+  libxext6 \
+  libxkbcommon-x11-0 \
+  libxkbcommon0 \
+  libxkbfile1 \
+  libxrandr2 \
+  libxrender1 \
+  libxt6 \
+  mesa-utils \
+  qt5dxcb-plugin \
 
 
 # https://gitlab.com/nvidia/container-images/opengl/blob/ubuntu20.04/glvnd/devel/Dockerfile
@@ -181,16 +246,8 @@ apt update && apt install -y \
 #  libgles2-mesa-dev libgles2-mesa-dev:i386 && \
 #rm -rf /var/lib/apt/lists/*
 
-# Some optional stuff that does not come standard with XFCE4444
-# - xfce4-goodies because they are goodies
-# - pciutils because I need lspci
-# - kmod so I can use lsmod
-#apt update && apt install -y \
-#  xfce4-goodies \
-#  pciutils \
-#  kmod \
-#  inxi \
-#  lshw \
+# Post installation cleanup
+apt clean
 
 %test
 # Runs at the very end of the build process to be used to validate the container.
