@@ -129,8 +129,9 @@ be held by the server and terminating the process will result in the server bein
 # Source: https://askubuntu.com/questions/328240/assign-vnc-password-using-script
 # TODO: Delete this - pulseaudio --start  # Fix `[Qt] PulseAudioService: pa_context_connect() failed` in 3D Slicer
 rm -drf $HOME/.vnc && mkdir $HOME/.vnc \
-{echo {{MY_VNC_PASSWORD}} | /opt/TurboVNC/bin/vncpasswd -f > $HOME/.vnc/passwd} \
+&& echo {{MY_VNC_PASSWORD}} | /opt/TurboVNC/bin/vncpasswd -f > $HOME/.vnc/passwd \
 && chmod 0600 $HOME/.vnc/passwd
+
 cat <<-'EOF'
 
 	####################
