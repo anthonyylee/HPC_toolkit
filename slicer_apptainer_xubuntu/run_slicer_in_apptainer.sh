@@ -15,7 +15,6 @@ sbatch <<-EOF
 	#SBATCH --time=$RUNTIME_HR:00:00
 	#SBATCH --output=log/slurm_%x_%j.out
 	#SBATCH --qos=normal
-	#SBATCH --mem=$((GPU_NODES * 200))GB
 
 	apptainer run \
 	  --app turbovnc \
