@@ -4,7 +4,8 @@ From: hectorm/xubuntu:v127
 %labels
 # Used to add metadata to the file `/.singularity.d/labels.json` within the container in name-value pairs.
 Author Anthony Y. Lee
-Version v1.0.0
+Version v1.0.1
+LastUpdate 2026-06-01
 
 %help
 # Any text in this section will be transcribed into a dedicated metadata file in the container during the build process.
@@ -96,7 +97,7 @@ SLICER_HOME="/opt/slicer" \
 cat <<-'EOF' > slicer_install_extensions.py
 	# https://slicer.readthedocs.io/en/latest/developer_guide/script_repository.html#download-and-install-extension
 
-	extension_names = ["SlicerMorph", "Sandbox", "NvidiaAIAssistedAnnotation", "SlicerIGT"]
+	extension_names = ["SlicerMorph", "Sandbox", "NvidiaAIAssistedAnnotation", "SlicerIGT", "SlicerBiomech"]
 
 	for ext_idx, extension_name in enumerate(extension_names):
 	    em = slicer.app.extensionsManagerModel()
