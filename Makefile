@@ -11,11 +11,11 @@ help:
 	@echo ""
 
 .PHONY: slicer-vnc-mig
-slicer-vnc-mig:
+slicer-vnc-h200-l4-nodes:
 	# Define variables
-	GPU_NODES=1
+	GPU_NODES=4
 	TASKS_PER_NODE=8
-	RUNTIME_HR=8
+	RUNTIME_HR=10
 
 	# Generate the sbatch script
 	sbatch <<-EOF
