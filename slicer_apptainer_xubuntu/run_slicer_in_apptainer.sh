@@ -3,7 +3,7 @@
 # Define variables
 GPU_NODES=4
 TASKS_PER_NODE=8
-RUNTIME_HR=10
+RUNTIME_HR=12
 
 # Generate the sbatch script
 sbatch <<-EOF
