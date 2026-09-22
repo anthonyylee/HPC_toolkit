@@ -5,12 +5,12 @@ help:
 	@echo "Usage: make [target]"
 	@echo ""
 	@echo "Targets:"
-	@echo "  slicer-vnc-h200-4-nodes"
+	@echo "  slicer-vnc-h200-4x"
 	@echo "    Script to start a slurm job for a 4x GPU node session in an Xubuntu Apptainer container for 3D Slicer."
 	@echo ""
 
-.PHONY: slicer-vnc-h200-4-nodes
-slicer-vnc-h200-4-nodes:
+.PHONY: slicer-vnc-h200-4x
+slicer-vnc-h200-4x:
 	# Define variables
 	GPU_NODES=4
 	TASKS_PER_NODE=8
@@ -26,6 +26,30 @@ slicer-vnc-h200-4-nodes:
 		#SBATCH --output=log/slurm_%x_%j.out
 		#SBATCH --qos=normal
 		#SBATCH --partition=gpu-h200
+		apptainer run \
+		  --app turbovnc \
+		  --nv \
+		  --bind /run,/gpfs \
+		  /gpfs/projects/gavia/apptainer_containers/3DSlicer_Xubuntu.sif
+	EOF
+
+.PHONY: slicer-vnc-mig-20x
+slicer-vnc-mig-20x:
+	# Define variables
+	GPU_NODES=20
+	TASKS_PER_NODE=1
+	RUNTIME_HR=12
+
+	# Generate the sbatch script
+	sbatch <<-EOF
+		#!/bin/bash
+		#SBATCH --job-name=slicer_in_apptainer
+		#SBATCH --gpus=$${GPU_NODES} 
+		#SBATCH --ntasks-per-node=$$((TASKS_PER_NODE * GPU_NODES))
+		#SBATCH --time=$${RUNTIME_HR}:00:00
+		#SBATCH --output=log/slurm_%x_%j.out
+		#SBATCH --qos=normal
+		#SBATCH --partition=gpu-h200-mig
 		apptainer run \
 		  --app turbovnc \
 		  --nv \
