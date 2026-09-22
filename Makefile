@@ -5,13 +5,12 @@ help:
 	@echo "Usage: make [target]"
 	@echo ""
 	@echo "Targets:"
-	@echo "  target_1"
-	@echo ""
-	@echo "  target_2"
+	@echo "  slicer-vnc-h200-4-nodes"
+	@echo "    Script to start a slurm job for a 4x GPU node session in an Xubuntu Apptainer container for 3D Slicer."
 	@echo ""
 
-.PHONY: slicer-vnc-mig
-slicer-vnc-h200-l4-nodes:
+.PHONY: slicer-vnc-h200-4-nodes
+slicer-vnc-h200-4-nodes:
 	# Define variables
 	GPU_NODES=4
 	TASKS_PER_NODE=8
