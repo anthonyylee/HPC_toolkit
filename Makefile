@@ -26,7 +26,7 @@ slicer-vnc-h200-4x:
 		#SBATCH --gpus=$${GPU_NODES} 
 		#SBATCH --ntasks-per-node=$$((TASKS_PER_NODE * GPU_NODES))
 		#SBATCH --time=$${RUNTIME_HR}:00:00
-		#SBATCH --output=slurm_log/slurm_%x_%j.out
+		#SBATCH --output=slurm_log/slurm-%x-%j.out
 		#SBATCH --qos=normal
 		#SBATCH --partition=gpu-h200
 		apptainer run \
@@ -50,7 +50,7 @@ slicer-vnc-mig-20x:
 		#SBATCH --gpus=$${GPU_NODES} 
 		#SBATCH --ntasks-per-node=$$((TASKS_PER_NODE * GPU_NODES))
 		#SBATCH --time=$${RUNTIME_HR}:00:00
-		#SBATCH --output=slurm_log/slurm_%x_%j.out
+		#SBATCH --output=slurm_log/slurm-%x-%j.out
 		#SBATCH --qos=normal
 		#SBATCH --partition=gpu-h200-mig
 		apptainer run \
