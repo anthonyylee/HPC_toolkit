@@ -8,6 +8,9 @@ help:
 	@echo "  slicer-vnc-h200-4x"
 	@echo "    Script to start a slurm job for a 4x GPU node session in an Xubuntu Apptainer container for 3D Slicer."
 	@echo ""
+	@echo "  slicer-vnc-mig-20x"
+	@echo "    Script to start a MIG slurm job for 20x migs."
+	@echo ""
 
 .PHONY: slicer-vnc-h200-4x
 slicer-vnc-h200-4x:
