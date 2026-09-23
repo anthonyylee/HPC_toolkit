@@ -40,6 +40,11 @@ slicer-vnc-h200-4x:
 
 .PHONY: slicer-vnc-mig-20x
 slicer-vnc-mig-20x:
+	
+	#################################
+	## Stop using after 2026-09-25 ##
+	#################################
+
 	# Define variables
 	GPU_NODES=20
 	TASKS_PER_NODE=1
