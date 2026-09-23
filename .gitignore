@@ -2,4 +2,4 @@
 **/*.sif
 **/.*
 **/do_not_track
-**/log/
+**/slurm_log/
