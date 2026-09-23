@@ -11,6 +11,8 @@ help:
 	@echo "  slicer-vnc-mig-20x"
 	@echo "    Script to start a MIG slurm job for 20x migs."
 	@echo ""
+	@echo "  sinfo"
+	@echo "    sinfo of Hyak Tillicum."
 
 .PHONY: slicer-vnc-h200-4x
 slicer-vnc-h200-4x:
@@ -60,3 +62,6 @@ slicer-vnc-mig-20x:
 		  /gpfs/projects/gavia/apptainer_containers/3DSlicer_Xubuntu.sif
 	EOF
 
+.PHONY: sinfo
+sinfo:
+	watch -n1 'sinfo -O nodehost,statecompact,gresused -S statecompact,gresused'
