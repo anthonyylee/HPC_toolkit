@@ -38,15 +38,15 @@ slicer-vnc-h200-4x:
 		  /gpfs/projects/gavia/apptainer_containers/3DSlicer_Xubuntu.sif
 	EOF
 
-.PHONY: slicer-vnc-mig-20x
-slicer-vnc-mig-20x:
+.PHONY: slicer-vnc-mig-32x
+slicer-vnc-mig-32x:
 	
 	#################################
 	## Stop using after 2026-09-25 ##
 	#################################
 
 	# Define variables
-	GPU_NODES=20
+	GPU_NODES=32
 	TASKS_PER_NODE=1
 	RUNTIME_HR=12
 
