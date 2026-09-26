@@ -5,19 +5,19 @@ help:
 	@echo "Usage: make [target]"
 	@echo ""
 	@echo "Targets:"
-	@echo "  slicer-vnc-h200-4x"
-	@echo "    Script to start a slurm job for a 4x GPU node session in an Xubuntu Apptainer container for 3D Slicer."
+	@echo "  slicer-vnc-h200"
+	@echo "    Script to start a slurm job in an Xubuntu Apptainer container for 3D Slicer."
 	@echo ""
-	@echo "  slicer-vnc-mig-20x"
-	@echo "    Script to start a MIG slurm job for 20x migs."
+	@echo "  slicer-vnc-mig"
+	@echo "    Script to start a MIG slurm job."
 	@echo ""
 	@echo "  sinfo"
 	@echo "    sinfo of Hyak Tillicum."
 
-.PHONY: slicer-vnc-h200-4x
-slicer-vnc-h200-4x:
+.PHONY: slicer-vnc-h200
+slicer-vnc-h200:
 	# Define variables
-	GPU_NODES=4
+	GPU_NODES=2
 	TASKS_PER_NODE=8
 	RUNTIME_HR=12
 
@@ -38,15 +38,15 @@ slicer-vnc-h200-4x:
 		  /gpfs/projects/gavia/apptainer_containers/3DSlicer_Xubuntu.sif
 	EOF
 
-.PHONY: slicer-vnc-mig-32x
-slicer-vnc-mig-32x:
+.PHONY: slicer-vnc-mig
+slicer-vnc-mig:
 	
 	#################################
 	## Stop using after 2026-09-25 ##
 	#################################
 
 	# Define variables
-	GPU_NODES=32
+	GPU_NODES=20
 	TASKS_PER_NODE=1
 	RUNTIME_HR=12
 
